@@ -1,2 +1,345 @@
-# C.N.Notes
-Notes, horodatage et calandrier intégrés !
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.N.Notes V2</title>
+
+<style>
+:root{
+--bg:#f2f2f7;
+--card:white;
+--text:#111;
+--accent:#ffcc00;
+}
+
+.dark{
+--bg:#111;
+--card:#1c1c1e;
+--text:white;
+}
+
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+background:var(--bg);
+color:var(--text);
+transition:.3s;
+}
+
+header{
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+h1{
+margin:0;
+font-size:2.2em;
+}
+
+button{
+border:none;
+padding:10px 15px;
+border-radius:12px;
+cursor:pointer;
+}
+
+.top-buttons{
+display:flex;
+gap:10px;
+}
+
+.search{
+width:90%;
+margin:auto;
+display:block;
+padding:12px;
+border-radius:12px;
+border:none;
+font-size:16px;
+}
+
+.controls{
+padding:15px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+select,input[type="date"]{
+padding:10px;
+border-radius:10px;
+border:none;
+}
+
+.editor{
+padding:15px;
+}
+
+textarea{
+width:100%;
+height:150px;
+padding:15px;
+border:none;
+border-radius:15px;
+font-size:16px;
+resize:none;
+box-sizing:border-box;
+background:var(--card);
+color:var(--text);
+}
+
+.save-btn{
+background:var(--accent);
+width:100%;
+margin-top:10px;
+font-size:18px;
+}
+
+.note{
+background:var(--card);
+margin:15px;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 5px rgba(0,0,0,.1);
+}
+
+.note-top{
+display:flex;
+justify-content:space-between;
+}
+
+.date{
+opacity:.7;
+font-size:12px;
+margin-top:10px;
+}
+
+.pin{
+cursor:pointer;
+font-size:22px;
+}
+
+.delete{
+background:red;
+color:white;
+margin-top:10px;
+}
+
+.lock-screen{
+position:fixed;
+inset:0;
+background:#111;
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+.lock-screen input{
+padding:15px;
+font-size:20px;
+border-radius:10px;
+border:none;
+margin:15px;
+text-align:center;
+}
+
+.calendar{
+padding:15px;
+text-align:center;
+font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="lock-screen" id="lockScreen">
+<h1>🔒 C.N.Notes</h1>
+<input type="password" id="pinInput" placeholder="Code PIN">
+<button onclick="unlock()">Entrer</button>
+<button onclick="setPin()">Créer/Changer PIN</button>
+</div>
+
+<header>
+<h1>C.N.Notes</h1>
+
+<div class="top-buttons">
+<button onclick="toggleTheme()">🌙</button>
+</div>
+</header>
+
+<input class="search" placeholder="🔍 Rechercher..." oninput="displayNotes(this.value)">
+
+<div class="calendar">
+📅 <span id="today"></span>
+</div>
+
+<div class="controls">
+<select id="folder">
+<option>Personnel</option>
+<option>Travail</option>
+<option>École</option>
+<option>Idées</option>
+</select>
+
+<input type="date" id="date">
+</div>
+
+<div class="editor">
+<textarea id="noteText" placeholder="Écris une note..."></textarea>
+
+<button class="save-btn" onclick="saveNote()">
+➕ Ajouter la note
+</button>
+</div>
+
+<div id="notes"></div>
+
+<script>
+
+document.getElementById("today").innerText=
+new Date().toLocaleDateString("fr-FR",{
+weekday:"long",
+day:"numeric",
+month:"long",
+year:"numeric"
+});
+
+if(localStorage.theme==="dark")
+document.body.classList.add("dark");
+
+function toggleTheme(){
+document.body.classList.toggle("dark");
+
+localStorage.theme=
+document.body.classList.contains("dark")
+?"dark":"light";
+}
+
+function saveNote(){
+
+let text=document.getElementById("noteText").value;
+
+if(!text)return;
+
+let notes=
+JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+notes.push({
+text:text,
+folder:folder.value,
+date:new Date().toLocaleString(),
+pinned:false
+});
+
+localStorage.setItem("cnnotes",JSON.stringify(notes));
+
+document.getElementById("noteText").value="";
+
+displayNotes();
+}
+
+function displayNotes(search=""){
+
+let notes=
+JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+notes.sort((a,b)=>b.pinned-a.pinned);
+
+let html="";
+
+notes.forEach((n,i)=>{
+
+if(!n.text.toLowerCase().includes(search.toLowerCase()))
+return;
+
+html+=`
+<div class="note">
+
+<div class="note-top">
+<strong>📁 ${n.folder}</strong>
+
+<span class="pin"
+onclick="pinNote(${i})">
+${n.pinned?"📌":"📍"}
+</span>
+</div>
+
+<p>${n.text.replace(/\n/g,"<br>")}</p>
+
+<div class="date">
+🕒 ${n.date}
+</div>
+
+<button class="delete"
+onclick="deleteNote(${i})">
+Supprimer
+</button>
+
+</div>`;
+});
+
+document.getElementById("notes").innerHTML=html;
+}
+
+function deleteNote(i){
+let notes=
+JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+notes.splice(i,1);
+
+localStorage.setItem("cnnotes",JSON.stringify(notes));
+
+displayNotes();
+}
+
+function pinNote(i){
+
+let notes=
+JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+notes[i].pinned=!notes[i].pinned;
+
+localStorage.setItem("cnnotes",JSON.stringify(notes));
+
+displayNotes();
+}
+
+function setPin(){
+
+let p=prompt("Choisis un code PIN");
+
+if(p)
+localStorage.pin=p;
+}
+
+function unlock(){
+
+let p=document.getElementById("pinInput").value;
+
+if(!localStorage.pin){
+document.getElementById("lockScreen").style.display="none";
+return;
+}
+
+if(p===localStorage.pin)
+document.getElementById("lockScreen").style.display="none";
+else
+alert("Mauvais code");
+}
+
+if(!localStorage.pin)
+document.getElementById("lockScreen").style.display="none";
+
+displayNotes();
+
+</script>
+
+</body>
+</html>
