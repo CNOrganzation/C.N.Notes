@@ -3,339 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>C.N.Notes</title>
 
 <style>
-:root{
---bg:#f2f2f7;
---card:white;
---text:#111;
---accent:#ffcc00;
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:#f2f2f7;
+    color:#000;
 }
 
 .dark{
---bg:#111;
---card:#1c1c1e;
---text:white;
+    background:#1c1c1e;
+    color:white;
 }
 
-body{
-margin:0;
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:var(--bg);
-color:var(--text);
-transition:.3s;
+#lockScreen{
+    position:fixed;
+    inset:0;
+    background:#000;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+#pin{
+    padding:15px;
+    font-size:30px;
+    text-align:center;
+    width:120px;
+    border-radius:15px;
+    border:none;
 }
 
 header{
-padding:20px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+    padding:20px;
+    background:white;
+    position:sticky;
+    top:0;
+}
+
+.dark header{
+    background:#2c2c2e;
 }
 
 h1{
-margin:0;
-font-size:2.2em;
+    margin:0;
+}
+
+input,select,textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #ccc;
+    margin-top:10px;
 }
 
 button{
-border:none;
-padding:10px 15px;
-border-radius:12px;
-cursor:pointer;
-}
-
-.top-buttons{
-display:flex;
-gap:10px;
-}
-
-.search{
-width:90%;
-margin:auto;
-display:block;
-padding:12px;
-border-radius:12px;
-border:none;
-font-size:16px;
-}
-
-.controls{
-padding:15px;
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-select,input[type="date"]{
-padding:10px;
-border-radius:10px;
-border:none;
-}
-
-.editor{
-padding:15px;
-}
-
-textarea{
-width:100%;
-height:150px;
-padding:15px;
-border:none;
-border-radius:15px;
-font-size:16px;
-resize:none;
-box-sizing:border-box;
-background:var(--card);
-color:var(--text);
-}
-
-.save-btn{
-background:var(--accent);
-width:100%;
-margin-top:10px;
-font-size:18px;
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    margin-top:10px;
+    background:#007aff;
+    color:white;
 }
 
 .note{
-background:var(--card);
-margin:15px;
-padding:15px;
-border-radius:15px;
-box-shadow:0 2px 5px rgba(0,0,0,.1);
+    background:white;
+    margin:15px;
+    padding:15px;
+    border-radius:15px;
 }
 
-.note-top{
-display:flex;
-justify-content:space-between;
+.dark .note{
+    background:#2c2c2e;
 }
 
 .date{
-opacity:.7;
-font-size:12px;
-margin-top:10px;
+    color:gray;
+    font-size:12px;
 }
 
-.pin{
-cursor:pointer;
-font-size:22px;
-}
-
-.delete{
-background:red;
-color:white;
-margin-top:10px;
-}
-
-.lock-screen{
-position:fixed;
-inset:0;
-background:#111;
-color:white;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-z-index:9999;
-}
-
-.lock-screen input{
-padding:15px;
-font-size:20px;
-border-radius:10px;
-border:none;
-margin:15px;
-text-align:center;
-}
-
-.calendar{
-padding:15px;
-text-align:center;
-font-size:18px;
+.star{
+    float:right;
+    font-size:22px;
+    cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="lock-screen" id="lockScreen">
+<div id="lockScreen">
 <h1>🔒 C.N.Notes</h1>
-<input type="password" id="pinInput" placeholder="Code PIN">
-<button onclick="unlock()">Entrer</button>
-<button onclick="setPin()">Créer/Changer PIN</button>
+<p>Entrez votre code</p>
+<input type="password" id="pin" maxlength="4">
+<button onclick="unlock()">Déverrouiller</button>
 </div>
 
 <header>
 <h1>C.N.Notes</h1>
 
-<div class="top-buttons">
-<button onclick="toggleTheme()">🌙</button>
-</div>
-</header>
+<input id="search" placeholder="🔍 Rechercher..." onkeyup="displayNotes()">
 
-<input class="search" placeholder="🔍 Rechercher..." oninput="displayNotes(this.value)">
-
-<div class="calendar">
-📅 <span id="today"></span>
-</div>
-
-<div class="controls">
 <select id="folder">
 <option>Personnel</option>
 <option>Travail</option>
-<option>École</option>
+<option>Études</option>
 <option>Idées</option>
 </select>
 
-<input type="date" id="date">
-</div>
+<button onclick="toggleDark()">🌙 Mode sombre</button>
+</header>
 
-<div class="editor">
-<textarea id="noteText" placeholder="Écris une note..."></textarea>
-
-<button class="save-btn" onclick="saveNote()">
-➕ Ajouter la note
-</button>
+<div style="padding:15px">
+<input id="title" placeholder="Titre">
+<textarea id="content" rows="6" placeholder="Écrire une note..."></textarea>
+<button onclick="addNote()">Ajouter la note</button>
 </div>
 
 <div id="notes"></div>
 
 <script>
 
-document.getElementById("today").innerText=
-new Date().toLocaleDateString("fr-FR",{
-weekday:"long",
-day:"numeric",
-month:"long",
-year:"numeric"
-});
-
-if(localStorage.theme==="dark")
-document.body.classList.add("dark");
-
-function toggleTheme(){
-document.body.classList.toggle("dark");
-
-localStorage.theme=
-document.body.classList.contains("dark")
-?"dark":"light";
-}
-
-function saveNote(){
-
-let text=document.getElementById("noteText").value;
-
-if(!text)return;
-
-let notes=
-JSON.parse(localStorage.getItem("cnnotes"))||[];
-
-notes.push({
-text:text,
-folder:folder.value,
-date:new Date().toLocaleString(),
-pinned:false
-});
-
-localStorage.setItem("cnnotes",JSON.stringify(notes));
-
-document.getElementById("noteText").value="";
-
-displayNotes();
-}
-
-function displayNotes(search=""){
-
-let notes=
-JSON.parse(localStorage.getItem("cnnotes"))||[];
-
-notes.sort((a,b)=>b.pinned-a.pinned);
-
-let html="";
-
-notes.forEach((n,i)=>{
-
-if(!n.text.toLowerCase().includes(search.toLowerCase()))
-return;
-
-html+=`
-<div class="note">
-
-<div class="note-top">
-<strong>📁 ${n.folder}</strong>
-
-<span class="pin"
-onclick="pinNote(${i})">
-${n.pinned?"📌":"📍"}
-</span>
-</div>
-
-<p>${n.text.replace(/\n/g,"<br>")}</p>
-
-<div class="date">
-🕒 ${n.date}
-</div>
-
-<button class="delete"
-onclick="deleteNote(${i})">
-Supprimer
-</button>
-
-</div>`;
-});
-
-document.getElementById("notes").innerHTML=html;
-}
-
-function deleteNote(i){
-let notes=
-JSON.parse(localStorage.getItem("cnnotes"))||[];
-
-notes.splice(i,1);
-
-localStorage.setItem("cnnotes",JSON.stringify(notes));
-
-displayNotes();
-}
-
-function pinNote(i){
-
-let notes=
-JSON.parse(localStorage.getItem("cnnotes"))||[];
-
-notes[i].pinned=!notes[i].pinned;
-
-localStorage.setItem("cnnotes",JSON.stringify(notes));
-
-displayNotes();
-}
-
-function setPin(){
-
-let p=prompt("Choisis un code PIN");
-
-if(p)
-localStorage.pin=p;
-}
+const CODE="1234";
 
 function unlock(){
-
-let p=document.getElementById("pinInput").value;
-
-if(!localStorage.pin){
-document.getElementById("lockScreen").style.display="none";
-return;
+    if(document.getElementById("pin").value===CODE){
+        document.getElementById("lockScreen").style.display="none";
+    }else{
+        alert("Code incorrect");
+    }
 }
 
-if(p===localStorage.pin)
-document.getElementById("lockScreen").style.display="none";
-else
-alert("Mauvais code");
+let notes=JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+function save(){
+    localStorage.setItem("cnnotes",JSON.stringify(notes));
 }
 
-if(!localStorage.pin)
-document.getElementById("lockScreen").style.display="none";
+function addNote(){
+
+    let title=document.getElementById("title").value;
+    let content=document.getElementById("content").value;
+    let folder=document.getElementById("folder").value;
+
+    if(title==="") return;
+
+    notes.unshift({
+        title,
+        content,
+        folder,
+        date:new Date().toLocaleString(),
+        pinned:false
+    });
+
+    save();
+
+    document.getElementById("title").value="";
+    document.getElementById("content").value="";
+
+    displayNotes();
+}
+
+function pin(i){
+    notes[i].pinned=!notes[i].pinned;
+    save();
+    displayNotes();
+}
+
+function displayNotes(){
+
+    let zone=document.getElementById("notes");
+    let search=document.getElementById("search").value.toLowerCase();
+
+    zone.innerHTML="";
+
+    notes.sort((a,b)=>b.pinned-a.pinned);
+
+    notes.forEach((n,i)=>{
+
+        if(
+        !n.title.toLowerCase().includes(search) &&
+        !n.content.toLowerCase().includes(search)
+        ) return;
+
+        zone.innerHTML+=`
+        <div class="note">
+            <span class="star" onclick="pin(${i})">
+            ${n.pinned ? "⭐":"☆"}
+            </span>
+
+            <h2>${n.title}</h2>
+
+            <small>${n.folder}</small>
+
+            <p>${n.content.replace(/\n/g,"<br>")}</p>
+
+            <div class="date">${n.date}</div>
+        </div>
+        `;
+    });
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
 
 displayNotes();
 
