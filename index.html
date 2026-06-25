@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.N.Notes</title>
+
+<style>
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:#f2f2f7;
+    color:#000;
+}
+
+.dark{
+    background:#1c1c1e;
+    color:white;
+}
+
+#lockScreen{
+    position:fixed;
+    inset:0;
+    background:#000;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+#pin{
+    padding:15px;
+    font-size:30px;
+    text-align:center;
+    width:120px;
+    border-radius:15px;
+    border:none;
+}
+
+header{
+    padding:20px;
+    background:white;
+    position:sticky;
+    top:0;
+}
+
+.dark header{
+    background:#2c2c2e;
+}
+
+h1{
+    margin:0;
+}
+
+input,select,textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #ccc;
+    margin-top:10px;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    margin-top:10px;
+    background:#007aff;
+    color:white;
+}
+
+.note{
+    background:white;
+    margin:15px;
+    padding:15px;
+    border-radius:15px;
+}
+
+.dark .note{
+    background:#2c2c2e;
+}
+
+.date{
+    color:gray;
+    font-size:12px;
+}
+
+.star{
+    float:right;
+    font-size:22px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="lockScreen">
+<h1>🔒 C.N.Notes</h1>
+<p>Entrez votre code</p>
+<input type="password" id="pin" maxlength="4">
+<button onclick="unlock()">Déverrouiller</button>
+</div>
+
+<header>
+<h1>C.N.Notes</h1>
+
+<input id="search" placeholder="🔍 Rechercher..." onkeyup="displayNotes()">
+
+<select id="folder">
+<option>Personnel</option>
+<option>Travail</option>
+<option>Études</option>
+<option>Idées</option>
+</select>
+
+<button onclick="toggleDark()">🌙 Mode sombre</button>
+</header>
+
+<div style="padding:15px">
+<input id="title" placeholder="Titre">
+<textarea id="content" rows="6" placeholder="Écrire une note..."></textarea>
+<button onclick="addNote()">Ajouter la note</button>
+</div>
+
+<div id="notes"></div>
+
+<script>
+
+const CODE="1234";
+
+function unlock(){
+    if(document.getElementById("pin").value===CODE){
+        document.getElementById("lockScreen").style.display="none";
+    }else{
+        alert("Code incorrect");
+    }
+}
+
+let notes=JSON.parse(localStorage.getItem("cnnotes"))||[];
+
+function save(){
+    localStorage.setItem("cnnotes",JSON.stringify(notes));
+}
+
+function addNote(){
+
+    let title=document.getElementById("title").value;
+    let content=document.getElementById("content").value;
+    let folder=document.getElementById("folder").value;
+
+    if(title==="") return;
+
+    notes.unshift({
+        title,
+        content,
+        folder,
+        date:new Date().toLocaleString(),
+        pinned:false
+    });
+
+    save();
+
+    document.getElementById("title").value="";
+    document.getElementById("content").value="";
+
+    displayNotes();
+}
+
+function pin(i){
+    notes[i].pinned=!notes[i].pinned;
+    save();
+    displayNotes();
+}
+
+function displayNotes(){
+
+    let zone=document.getElementById("notes");
+    let search=document.getElementById("search").value.toLowerCase();
+
+    zone.innerHTML="";
+
+    notes.sort((a,b)=>b.pinned-a.pinned);
+
+    notes.forEach((n,i)=>{
+
+        if(
+        !n.title.toLowerCase().includes(search) &&
+        !n.content.toLowerCase().includes(search)
+        ) return;
+
+        zone.innerHTML+=`
+        <div class="note">
+            <span class="star" onclick="pin(${i})">
+            ${n.pinned ? "⭐":"☆"}
+            </span>
+
+            <h2>${n.title}</h2>
+
+            <small>${n.folder}</small>
+
+            <p>${n.content.replace(/\n/g,"<br>")}</p>
+
+            <div class="date">${n.date}</div>
+        </div>
+        `;
+    });
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+
+displayNotes();
+
+</script>
+
+</body>
+</html>
