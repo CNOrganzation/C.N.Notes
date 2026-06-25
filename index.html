@@ -114,7 +114,53 @@ button{
 </script></head>
 
 <body>
+<h2>C.N.Notes Connexion</h2>
 
+<input type="text" id="pseudo" placeholder="Pseudo"><br><br>
+
+<input type="email" id="email" placeholder="Email"><br><br>
+
+<input type="password" id="password" placeholder="Mot de passe"><br><br>
+
+<button onclick="inscription()">Créer un compte</button>
+
+<button onclick="connexion()">Connexion</button>
+
+<button onclick="deconnexion()">Déconnexion</button>
+
+<p id="user">Non connecté</p><h2>Créer un compte</h2>
+
+<input id="pseudo" placeholder="Pseudo">
+
+<input id="email" type="email"
+placeholder="Email">
+
+<input id="password" type="password"
+placeholder="Mot de passe">
+
+<button onclick="inscription()">
+Créer le compte
+</button>
+    <h2>Connexion</h2>
+
+<input id="emailConnexion"
+type="email"
+placeholder="Email">
+
+<input id="passwordConnexion"
+type="password"
+placeholder="Mot de passe">
+
+<button onclick="connexion()">
+Connexion
+</button>
+    <h2 id="bienvenue">
+Non connecté
+</h2>
+
+<button onclick="deconnexion()">
+Déconnexion
+</button>
 <div id="lockScreen">
 <h1>🔒 C.N.Notes</h1>
 <p>Entrez votre code</p>
@@ -235,51 +281,5 @@ displayNotes();
 
 </script>
 
-h2>C.N.Notes Connexion</h2>
-
-<input type="text" id="pseudo" placeholder="Pseudo"><br><br>
-
-<input type="email" id="email" placeholder="Email"><br><br>
-
-<input type="password" id="password" placeholder="Mot de passe"><br><br>
-
-<button onclick="inscription()">Créer un compte</button>
-
-<button onclick="connexion()">Connexion</button>
-
-<button onclick="deconnexion()">Déconnexion</button>
-
-<p id="user">Non connecté</p><h2>Créer un compte</h2>
-
-<input id="pseudo" placeholder="Pseudo">
-
-<input id="email" type="email"
-placeholder="Email">
-
-<input id="password" type="password"
-placeholder="Mot de passe">
-
-<button onclick="inscription()">
-Créer le compte
-</button>
-    <h2>Connexion</h2>
-
-<input id="emailConnexion"
-type="email"
-placeholder="Email">
-
-<input id="passwordConnexion"
-type="password"
-placeholder="Mot de passe">
-
-<button onclick="connexion()">
-Connexion
-</button>
-    <h2 id="bienvenue">
-Non connecté
-</h2>
-
-<button onclick="deconnexion()">
-Déconnexion
-</button></body>
+</body>
 </html>
