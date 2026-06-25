@@ -166,7 +166,7 @@ font-size:18px;
 </div>
 
 <header>
-<h1>C.N.Notes</h1>
+
 
 <div class="top-buttons">
 <button onclick="toggleTheme()">🌙</button>
