@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C.N.Notes V2</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:0;background:#f2f2f7;color:#111;transition:.3s}
+body.dark{background:#111;color:#fff}
+header{padding:15px;background:#fff;position:sticky;top:0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.dark header,.dark .panel,.dark .note{background:#222;color:#fff}
+.container{max-width:900px;margin:auto;padding:15px}
+.panel,.note{background:#fff;padding:15px;border-radius:16px;margin:12px 0;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+input,textarea,select{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #ccc;box-sizing:border-box}
+button{padding:10px 15px;border:none;border-radius:10px;background:#ffcc00;margin:4px;cursor:pointer}
+.note.pinned{border-left:6px solid gold}
+.small{font-size:12px;color:gray}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.hidden{display:none}
+</style></head><body>
+<div id="lockScreen" class="container">
+<div class="panel"><h1>🔒 C.N.Notes V2</h1>
+<p>Code d'accès :</p><input type="password" id="pin">
+<button onclick="unlock()">Entrer</button>
+<button onclick="setPin()">Créer/Changer le code</button></div></div>
+
+<div id="app" class="hidden">
+<header><h1>📝 C.N.Notes V2</h1>
+<button onclick="toggleDark()">🌙 Mode sombre</button></header>
+<div class="container">
+<div class="panel">
+<input id="search" placeholder="🔍 Rechercher..." oninput="render()">
+<input id="folder" placeholder="Nom du dossier (ex: Travail)">
+<textarea id="text" placeholder="Écris une note..."></textarea>
+<div class="row">
+<button onclick="addNote()">Ajouter</button>
+<input type="date" id="cal">
+</div></div>
+<div id="notes"></div>
+</div></div>
+
+<script>
+let notes=JSON.parse(localStorage.getItem('cnn_v2')||'[]');
+function setPin(){let p=prompt("Nouveau code"); if(p){localStorage.setItem('cnn_pin',p); alert("Code enregistré");}}
+function unlock(){let saved=localStorage.getItem('cnn_pin'); if(!saved || document.getElementById('pin').value===saved){document.getElementById('lockScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');} else alert("Code incorrect");}
+if(!localStorage.getItem('cnn_pin')) document.getElementById('pin').placeholder="Aucun code défini";
+
+function save(){localStorage.setItem('cnn_v2',JSON.stringify(notes));}
+function addNote(){
+let t=text.value.trim(); if(!t) return;
+notes.push({text:t,folder:folder.value||"Général",date:new Date().toLocaleString('fr-FR'),pinned:false});
+text.value=''; folder.value=''; save(); render();
+}
+function delNote(i){notes.splice(i,1); save(); render();}
+function pinNote(i){notes[i].pinned=!notes[i].pinned; save(); render();}
+function render(){
+let q=search.value.toLowerCase();
+let arr=[...notes].sort((a,b)=>b.pinned-a.pinned);
+notesDiv.innerHTML='';
+arr.forEach(n=>{
+ let real=notes.indexOf(n);
+ if(q && !n.text.toLowerCase().includes(q) && !n.folder.toLowerCase().includes(q)) return;
+ notesDiv.innerHTML+=`<div class="note ${n.pinned?'pinned':''}">
+ <b>📁 ${n.folder}</b><div class="small">${n.date}</div>
+ <p>${n.text.replace(/\n/g,'<br>')}</p>
+ <button onclick="pinNote(${real})">${n.pinned?'📌 Désépingler':'📌 Épingler'}</button>
+ <button onclick="delNote(${real})">🗑️ Supprimer</button></div>`;
+});
+}
+function toggleDark(){document.body.classList.toggle('dark'); localStorage.setItem('cnn_dark',document.body.classList.contains('dark'));}
+if(localStorage.getItem('cnn_dark')==='true') document.body.classList.add('dark');
+render();
+</script></body></html>
