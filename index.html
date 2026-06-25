@@ -55,10 +55,13 @@ button{background:#007aff;color:#fff;border:none}
 <div id="notes"></div>
 
 <script>
-let notes = JSON.parse(localStorage.getItem("cnnotes")) || [];
+let notes = [];
 
 function save(){
- localStorage.setItem("cnnotes", JSON.stringify(notes));
+    if(auth.currentUser){
+        const cle = "cnnotes_" + auth.currentUser.email;
+        localStorage.setItem(cle, JSON.stringify(notes));
+    }
 }
 
 function addNote(){
@@ -160,9 +163,30 @@ document.getElementById("btnConnexion").onclick = async () => {
 document.getElementById("btnDeconnexion").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, user => {
- document.getElementById("bienvenue").textContent =
-   user ? "Connecté : " + (pseudo.value || user.email)
-        : "Non connecté";
+
+    if(user){
+
+        document.getElementById("bienvenue").textContent =
+        "Connecté : " + user.email;
+
+        const cle = "cnnotes_" + user.email;
+
+        notes = JSON.parse(
+            localStorage.getItem(cle)
+        ) || [];
+
+        displayNotes();
+
+    } else {
+
+        document.getElementById("bienvenue").textContent =
+        "Non connecté";
+
+        notes = [];
+
+        displayNotes();
+    }
+});
 });
 </script>
 
